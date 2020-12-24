@@ -1,17 +1,3 @@
-# from flask import Flask
-#
-# app = Flask(__name__)
-#
-#
-# @app.route('/')
-# def hello_world():
-#     return 'Hello World!'
-#
-#
-# if __name__ == '__main__':
-#     app.run()
-
-
 
 from flask import Flask
 from flask import request
@@ -26,7 +12,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=True
 
 @app.route('/')
 def test():
-    return '服务器正常运行'
+    return '服务器正常运行!!!'
 
 
 
