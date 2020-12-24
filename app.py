@@ -1,9 +1,11 @@
 
 from flask import Flask
 from flask import request
+from flask import jsonify
 import os
 import json
 import time
+import xxhash
 
 app = Flask(__name__)
 basedir=os.path.abspath(os.path.dirname(__file__))
@@ -13,7 +15,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=True
 @app.route('/')
 def test():
     return '服务器正常运行!!!'
-
 
 
 #此方法处理用户注册
@@ -28,8 +29,12 @@ def test():
 
 @app.route('/connect',methods=['GET'])
 def connect():
-    print("服务器连接成功")
-    return '服务器连接成功'
+    ip=request.remote_addr
+    user_id=(xxhash.xxh32(ip,seed=1)).intdigest()
+    print("user_id为:"+ip+"连接成功")
+    data={'user_id':user_id,'channel':2}
+    return jsonify(data)
+
 
 @app.route('/upload',methods=['POST'])
 def func():
