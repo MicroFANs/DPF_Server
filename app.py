@@ -7,6 +7,11 @@ import time
 import xxhash
 import random
 import function.Server as lib
+import function
+import csv
+import function
+import numpy as np
+import pandas as pd
 
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -77,7 +82,7 @@ def upOneSample():
     key = data["perturbed_key"]
     seed = data["seed"]
     print("perturbed_key:", key, "hash_seed:", seed)
-    time.sleep(5)
+    time.sleep(1)
     candidate = lib.getcandidate()
     index = [i + 1 for i in range(len(candidate))]
     returndate = (dict(zip(index, candidate)))
@@ -92,7 +97,7 @@ def upNumber():
     data = eval(numberjson)
     num = data["perturbed_number"]
     print("perturbed_number:", num)
-    time.sleep(3)
+    time.sleep(1)
     padlength = 2
     return str(padlength)
 
@@ -103,7 +108,7 @@ def upOneSampleUE():
     data = eval(numberjson)
     vector = data["perturbed_vector"]
     print("perturbed_vector:", vector)
-    time.sleep(6)
+    time.sleep(1)
     res = lib.getestimated()
     index = [i + 1 for i in range(len(res))]
     returndate = (dict(zip(index, res)))
@@ -112,6 +117,39 @@ def upOneSampleUE():
 
     return returnjson
 
+@app.route('/getLocation',methods=['GET'])
+def getLocation():
+    point_x=[]
+    point_y=[]
+    with open('function/data_normal.csv','r') as f:
+        reader=csv.reader(f)
+        for i in reader:
+            point_x.append(float(i[0]))
+            point_y.append(float(i[1]))
+    index = [i + 1 for i in range(len(point_x))]
+    label_x=(dict(zip(index,point_x)))
+    label_y=(dict(zip(index,point_y)))
+    return_x=json.dumps(label_x)
+    return_y=json.dumps(label_y)
+    print(return_x)
+    print(return_y)
+    dic={"label_x":return_x,"label_y":return_y}
+    return jsonify(dic)
+
+@app.route('/getCluster',methods=['GET'])
+def getCluster():
+    data=pd.read_csv('function/data_normal.csv',header=None)
+    dataset=np.array(data)
+    tp,label,sse,labels_list=lib.DPkmeans(dataset,k=5,iters=8,totalepslion=5,allocation=0)
+    print(len(labels_list))
+    index = [i + 1 for i in range(len(label))]
+    dic={}
+    for i in range(len(labels_list)):
+        l=(dict(zip(index,labels_list[i])))
+        dic[str(i)]=json.dumps(l)
+
+
+    return jsonify(dic)
 
 if __name__ == '__main__':
     app.run(debug=True)
